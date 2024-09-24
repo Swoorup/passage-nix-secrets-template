@@ -1,0 +1,46 @@
+load_nix_direnv_plugin() {
+  if ! has nix_direnv_version || ! nix_direnv_version 2.2.1; then
+    source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/2.2.1/direnvrc" "sha256-zelF0vLbEl5uaqrfIzbgNzJWGmLzCmYAkInj/LNxvKs="
+  fi
+}
+
+# Usage: watch_repo <repo_dir>
+# Watches the specified repository directory for changes to certain files, and triggers a rebuild of the Nix environment when those files change.
+#
+# When any of these files change, the Nix environment will be rebuilt to reflect the changes.
+watch_repo() {
+  local repo_dir
+  repo_dir="$1"
+
+  echo "Setting up watch for $repo_dir"
+
+  # Watch for changes to the lib directory
+  watch_dir $repo_dir/lib
+
+  # Watch for changes to the flake.nix and flake.lock files
+  watch_file \
+    $repo_dir/flake.nix \
+    $repo_dir/flake.lock
+}
+
+# Usage: load_vault_envrc [vault_dir]
+# 
+# Loads the Vault environment configuration file (`.envrc`) from the specified directory.
+load_vault_envrc() {
+  local vault_dir
+  vault_dir="${1:-${PWD}}"
+
+  local vault_name
+  vault_name="$(basename "$vault_dir")"
+
+  local repo_dir
+  repo_dir=$(dirname "$vault_dir")
+
+  load_nix_direnv_plugin
+  watch_repo $repo_dir
+
+  if ! use flake ../#"$vault_name" --impure
+  then
+    echo "devenv could not be built. The devenv environment was not loaded. Make the necessary changes to devenv.nix and hit enter to try again." >&2
+  fi
+}
