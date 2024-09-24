@@ -8,13 +8,9 @@ This system uses `passage` for secret management and integrates with `agenix` fo
 
 ## Getting Started
 
-1. Ensure you have Nix installed on your system.
+1. Ensure you have Nix, direnv, devenv installed on your system.
 2. Clone this repository.
-3. Enter the development shell:
-
-   ```sh
-   nix develop
-   ```
+3. Enter the development repl when you navigate to any of the vault directory: `daily-vault` or `critical-vault`.
 
 ## Vault Structure
 Secrets are organized into vaults. Each vault is a directory containing:
